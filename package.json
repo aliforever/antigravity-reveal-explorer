@@ -1,0 +1,65 @@
+{
+  "name": "antigravity-reveal-explorer",
+  "displayName": "Antigravity: Reveal in File Explorer (WSL)",
+  "description": "Reveal files in Windows File Explorer when running in WSL Remote mode",
+  "version": "0.1.0",
+  "publisher": "alierror",
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aliforever/antigravity-reveal-explorer"
+  },
+  "keywords": [
+    "wsl",
+    "explorer",
+    "reveal",
+    "file",
+    "windows"
+  ],
+  "galleryBanner": {
+    "color": "#1e293b",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "antigravity.revealInExplorer",
+        "title": "Reveal in File Explorer",
+        "category": "Antigravity"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "antigravity.revealInExplorer",
+          "group": "navigation@10"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "antigravity.revealInExplorer",
+          "group": "2_files@1"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npx -y @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
