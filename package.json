@@ -2,7 +2,7 @@
   "name": "antigravity-reveal-explorer",
   "displayName": "Antigravity: Reveal in File Explorer (WSL)",
   "description": "Reveal files in Windows File Explorer when running in WSL Remote mode",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "alierror",
   "license": "MIT",
   "icon": "icon.png",
