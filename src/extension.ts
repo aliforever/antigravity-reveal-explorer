@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
  * Convert a WSL Linux path to a Windows path using `wslpath -w`.
  */
 async function toWindowsPath(linuxPath: string): Promise<string> {
-  const { stdout } = await execAsync(`wslpath -w "${linuxPath}"`);
+  const { stdout } = await promisify(execFile)("wslpath", ["-w", linuxPath]);
   return stdout.trim();
 }
 
@@ -24,8 +24,23 @@ async function revealInWindowsExplorer(linuxPath: string): Promise<void> {
   // PowerShell runs explorer entirely in Windows context, fixing /select for UNC paths.
   // execFile passes args directly — no bash shell escaping issues.
   const psCommand = `explorer /select,"${normalized}"`;
-  execFile("powershell.exe", ["-NoProfile", "-Command", psCommand], () => {
-    // Intentionally ignore exit code
+  const psPath = "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe";
+
+  return new Promise((resolve, reject) => {
+    execFile(psPath, ["-NoProfile", "-Command", psCommand], (err) => {
+      if (err) {
+        // Fallback to powershell.exe in PATH just in case
+        execFile("powershell.exe", ["-NoProfile", "-Command", psCommand], (fallbackErr) => {
+          if (fallbackErr) {
+            reject(new Error(`Could not launch PowerShell to open Explorer.\nAbsolute path error: ${err.message}\nPATH error: ${fallbackErr.message}`));
+          } else {
+            resolve();
+          }
+        });
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
@@ -35,6 +50,20 @@ async function revealInWindowsExplorer(linuxPath: string): Promise<void> {
 function resolveFilePath(arg: unknown): string | undefined {
   if (arg instanceof vscode.Uri) {
     return arg.fsPath;
+  }
+
+  // Handle duck-typed URIs or tree nodes from custom explorers
+  if (arg && typeof arg === "object") {
+    // Some IDEs pass tree nodes with 'uri' or 'resourceUri'
+    const uriObj = (arg as any).uri || (arg as any).resourceUri || arg;
+
+    if (typeof uriObj.fsPath === "string" && uriObj.fsPath) {
+      return uriObj.fsPath;
+    }
+    
+    if (typeof uriObj.path === "string" && uriObj.path) {
+      return uriObj.path;
+    }
   }
 
   const activeEditor = vscode.window.activeTextEditor;
